@@ -60,6 +60,12 @@ githubReleaser {
     project {
         license
         homepage
+
+        /**
+         * Defaults:
+         * Project's description
+         */
+        description
     }
     publish {
         /**

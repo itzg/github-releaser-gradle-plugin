@@ -7,6 +7,7 @@ plugins {
     id 'me.qoomon.git-versioning' version '6.3.3'
 }
 
+description = 'Uploads application artifacts to GitHub release and publishes application manifests'
 group 'io.github.itzg'
 version '0.0.0-SNAPSHOT'
 gitVersioning.apply {
@@ -25,7 +26,7 @@ gradlePlugin {
         githubReleaser {
             id = 'io.github.itzg.github-releaser'
             displayName = 'Application GitHub Releaser'
-            description = 'Uploads application artifacts to GitHub release and publishes application manifests'
+            description = project.description
             implementationClass = 'io.github.itzg.ghrel.GithubReleaserPlugin'
         }
     }
