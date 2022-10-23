@@ -1,3 +1,4 @@
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/io.github.itzg.github-releaser)](https://plugins.gradle.org/plugin/io.github.itzg.github-releaser)
 
 This Gradle plugin uploads the [application plugin's](https://docs.gradle.org/current/userguide/application_plugin.html) distributions to the requested GitHub release and optionally publishes application manifests to a [Homebrew](https://brew.sh/) tap and/or [Scoop](https://scoop.sh/) bucket.
 
@@ -105,4 +106,23 @@ githubReleaser {
         }
     }
 }
+```
+
+## Examples
+
+### As a step in a GitHub workflow
+
+```yaml
+    - name: Gradle test and publish
+      uses: gradle/gradle-build-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_PUBLISH_TOKEN: ${{ secrets.PUSH_ACCESS_GITHUB_TOKEN }}
+        SCOOP_BUCKET_REPO: itzg/scoop-bucket
+        HOMEBREW_TAP_REPO: itzg/homebrew-tap
+      with:
+        arguments: |
+          test 
+          githubPublishApplication
+
 ```
