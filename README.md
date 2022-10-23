@@ -53,7 +53,10 @@ githubReleaser {
      * Env var: GITHUB_TOKEN
      */
     githubToken
-    
+
+    /**
+     * Used for published application manifests
+     */
     project {
         license
         homepage
