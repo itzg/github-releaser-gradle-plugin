@@ -67,16 +67,21 @@ abstract class PublishApplicationTask extends DefaultTask {
         final String contentPath = bucketDirectory != null ? "${bucketDirectory}/${name}.json" : "${name}.json"
         final Asset zipFile = assets.get().zipFile;
         final String version = applicationVersion.get();
-        def contentBuilder = new JsonBuilder([
-            'version': version,
-            'url': zipFile.downloadUrl,
-            'hash': "sha256:${zipFile.sha256}",
-            'bin': "bin/${name}.bat",
+
+        def manifest = [
+            'version'    : version,
+            'url'        : zipFile.downloadUrl,
+            'hash'       : "sha256:${zipFile.sha256}",
+            'bin'        : "bin/${name}.bat",
             'extract_dir': zipTopDirectory.get(),
-            'suggest': [
+            'suggest'    : [
                 'JRE': ['java/temurin-lts-jre']
             ]
-        ])
+        ]
+        extension.project.withConfiguredDescription(project, { description ->
+            manifest.description = description
+        })
+        def contentBuilder = new JsonBuilder(manifest)
 
         pushFileToRepo(
             gitHub, scoopProps.repository, scoopProps.branch, 'Scoop bucket',
@@ -87,9 +92,8 @@ abstract class PublishApplicationTask extends DefaultTask {
     private void publishToBrewTap(GitHub gitHub) {
         def homebrew = extension.publish.homebrew
         def name = applicationName.get()
-        def formulaTemplate = """
-class ${CaseUtils.toCamelCase(name, true, '-' as char)} < Formula
-  desc "${project.description}"
+        def formulaTemplate = """class ${CaseUtils.toCamelCase(name, true, '-' as char)} < Formula
+  desc "${extension.project.resolveDescription(project)}"
   homepage "${extension.project.homepage.getOrElse('')}"
   url "${assets.get().tarFile.downloadUrl}"
   sha256 "${assets.get().tarFile.sha256}"
