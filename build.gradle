@@ -1,0 +1,55 @@
+plugins {
+    id 'groovy'
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+    id 'com.gradle.plugin-publish' version '1.0.0'
+    // https://github.com/qoomon/gradle-git-versioning-plugin
+    id 'me.qoomon.git-versioning' version '6.3.2'
+}
+
+group 'io.github.itzg'
+version '0.0.0-SNAPSHOT'
+gitVersioning.apply {
+    refs {
+        tag('.+') {
+            version = '${ref}'
+        }
+        branch('.+') {
+            version = '0.0.0-${ref}-SNAPSHOT'
+        }
+    }
+}
+
+gradlePlugin {
+    plugins {
+        githubReleaser {
+            id = 'io.github.itzg.github-releaser'
+            displayName = 'Application GitHub Releaser'
+            description = 'Uploads application artifacts to GitHub release and publishes application manifests'
+            implementationClass = 'io.github.itzg.ghrel.GithubReleaserPlugin'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/itzg/github-releaser-gradle-plugin'
+    vcsUrl = 'https://github.com/itzg/github-releaser-gradle-plugin'
+    tags = ['github']
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.kohsuke:github-api:1.313'
+    implementation 'commons-codec:commons-codec:1.15'
+    implementation 'org.apache.commons:commons-text:1.10.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
