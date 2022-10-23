@@ -5,7 +5,7 @@ This Gradle plugin uploads the [application plugin's](https://docs.gradle.org/cu
 
 ### `githubReleaseApplication`
 
-Releases the artifacts from the [application plugin's](https://docs.gradle.org/current/userguide/application_plugin.html) `distTar` and `distZip` tasks to the assets section of a GitHub release named for the current project version.
+Releases the artifacts from the [application plugin's](https://docs.gradle.org/current/userguide/application_plugin.html) `distTar` and `distZip` tasks to the assets section of a GitHub release named for the current project version. The release is created if it doesn't already exist.
 
 The repository and GitHub token must be specifically provided, see [configuration](#configuration).
 
