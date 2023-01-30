@@ -4,7 +4,7 @@ plugins {
     id 'maven-publish'
     id 'com.gradle.plugin-publish' version '1.1.0'
     // https://github.com/qoomon/gradle-git-versioning-plugin
-    id 'me.qoomon.git-versioning' version '6.3.8'
+    id 'me.qoomon.git-versioning' version '6.4.0'
 }
 
 description = 'Uploads application artifacts to GitHub release and publishes application manifests'
