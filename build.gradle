@@ -22,20 +22,17 @@ gitVersioning.apply {
 }
 
 gradlePlugin {
+    website = 'https://github.com/itzg/github-releaser-gradle-plugin'
+    vcsUrl = 'https://github.com/itzg/github-releaser-gradle-plugin'
     plugins {
         githubReleaser {
             id = 'io.github.itzg.github-releaser'
             displayName = 'Application GitHub Releaser'
             description = project.description
+            tags.set(['github'])
             implementationClass = 'io.github.itzg.ghrel.GithubReleaserPlugin'
         }
     }
-}
-
-pluginBundle {
-    website = 'https://github.com/itzg/github-releaser-gradle-plugin'
-    vcsUrl = 'https://github.com/itzg/github-releaser-gradle-plugin'
-    tags = ['github']
 }
 
 repositories {
