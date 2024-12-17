@@ -14,6 +14,9 @@ import javax.inject.Inject
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
+/**
+ * Creates/updates a GitHub release and adds the application artifacts to the release.
+ */
 abstract class ReleaseApplicationTask extends DefaultTask {
 
     private GithubReleaserExtension extension;
