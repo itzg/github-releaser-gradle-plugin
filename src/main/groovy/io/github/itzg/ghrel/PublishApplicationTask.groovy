@@ -12,6 +12,9 @@ import org.kohsuke.github.GHRepository
 import org.kohsuke.github.GitHub
 import org.kohsuke.github.GitHubBuilder
 
+/**
+ * Publishes the application to package manager repositories, such as a Scoop Bucket or Brew Tap.
+ */
 abstract class PublishApplicationTask extends DefaultTask {
 
     @Internal
