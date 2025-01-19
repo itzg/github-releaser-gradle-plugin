@@ -21,6 +21,12 @@ gitVersioning.apply {
     }
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
 gradlePlugin {
     website = 'https://github.com/itzg/github-releaser-gradle-plugin'
     vcsUrl = 'https://github.com/itzg/github-releaser-gradle-plugin'
