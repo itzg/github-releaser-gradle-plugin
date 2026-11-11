@@ -19,6 +19,16 @@ Publishes an application manifest to some or all of the following:
 
 For each of the respective type(s), the publishing token and repository must be provided.
 
+Homebrew publishing writes a cask to `Casks/<application-name>.rb`, using the
+`distTar` archive version and executable. The version is emitted as a quoted
+string without changing prefixes such as `v`; versions containing characters
+Homebrew rejects (including `/` and `:`), an empty version, or `latest` fail
+publishing. The configured Java dependency is installed as a formula dependency.
+The cask does not declare a license because the cask DSL has no license stanza.
+Existing `Formula/<application-name>.rb` files are not removed automatically;
+remove the old formula from the tap when migrating, and uninstall it before
+installing the cask to avoid a conflicting executable.
+
 ## Configuration
 
 ### `githubReleaser` extension
