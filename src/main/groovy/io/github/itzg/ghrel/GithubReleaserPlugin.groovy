@@ -43,6 +43,9 @@ class GithubReleaserPlugin implements Plugin<Project> {
                 task.dependsOn(releaseTask);
 
                 task.assets.set(releaseTask.flatMap(ReleaseApplicationTask::getAssets));
+                task.applicationTar.set(releaseTask.flatMap(ReleaseApplicationTask::getApplicationTar));
+                task.tarVersion.set(project.tasks.named("distTar", Tar.class)
+                    .flatMap(AbstractArchiveTask::getArchiveVersion));
                 final TaskProvider<Zip> distZip = project.tasks.named("distZip", Zip.class);
                 task.zipTopDirectory.set(
                     distZip

@@ -49,12 +49,12 @@ dependencies {
 
     implementation 'org.kohsuke:github-api:1.330'
     implementation 'commons-codec:commons-codec:1.21.0'
-    implementation 'org.apache.commons:commons-text:1.15.0'
 
     // https://junit.org/junit5/docs/current/user-guide/#running-tests-build-gradle-bom
     testImplementation(platform("org.junit:junit-bom:6.0.3"))
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {

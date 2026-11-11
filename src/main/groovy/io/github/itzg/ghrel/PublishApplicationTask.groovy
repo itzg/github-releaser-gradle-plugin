@@ -1,9 +1,11 @@
 package io.github.itzg.ghrel
 
 import groovy.json.JsonBuilder
+import groovy.json.JsonGenerator
 import io.github.itzg.ghrel.Assets.Asset
-import org.apache.commons.text.CaseUtils
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -17,6 +19,9 @@ import org.kohsuke.github.GitHubBuilder
  */
 abstract class PublishApplicationTask extends DefaultTask {
 
+    private static final JsonGenerator RUBY_STRING_GENERATOR =
+        new JsonGenerator.Options().disableUnicodeEscaping().build()
+
     @Internal
     abstract Property<Assets> getAssets();
 
@@ -28,6 +33,12 @@ abstract class PublishApplicationTask extends DefaultTask {
 
     @Internal
     abstract Property<String> getZipTopDirectory();
+
+    @Internal
+    abstract RegularFileProperty getApplicationTar();
+
+    @Internal
+    abstract Property<String> getTarVersion();
 
     private GithubReleaserExtension extension;
 
@@ -95,23 +106,51 @@ abstract class PublishApplicationTask extends DefaultTask {
     private void publishToBrewTap(GitHub gitHub) {
         def homebrew = extension.publish.homebrew
         def name = applicationName.get()
-        def formulaTemplate = """class ${CaseUtils.toCamelCase(name, true, '-' as char)} < Formula
-  desc "${extension.project.resolveDescription(project)}"
-  homepage "${extension.project.homepage.getOrElse('')}"
-  url "${assets.get().tarFile.downloadUrl}"
-  sha256 "${assets.get().tarFile.sha256}"
-  license "${extension.project.license.getOrElse('')}"
+        def binaryPath = findTarBinaryPath(project, applicationTar.get().asFile, name)
+        def cask = renderCask(name, tarVersion.get(), assets.get().tarFile, binaryPath,
+            extension.project.resolveDescription(project), extension.project.homepage.getOrElse(''),
+            homebrew.javaDependency.get())
+        pushFileToRepo(gitHub, homebrew.repository, homebrew.branch, 'Homebrew tap',
+            "Casks/${name}.rb", cask)
+    }
 
-  depends_on "${homebrew.javaDependency.get()}"
+    static String findTarBinaryPath(org.gradle.api.Project project, File archive, String name) {
+        def matches = [] as Set<String>
+        project.tarTree(archive).visit { details ->
+            def path = details.relativePath.pathString
+            if (!details.directory && (path == "bin/${name}" || path.endsWith("/bin/${name}"))) {
+                matches.add(path)
+            }
+        }
+        if (matches.size() != 1) {
+            throw new GradleException("Expected one bin/${name} executable in ${archive}, found ${matches.size()}: ${matches}")
+        }
+        return matches.first()
+    }
 
-  def install
-    libexec.install Dir["*"]
-    bin.install_symlink "#{libexec}/bin/${name}"
-  end
+    static String renderCask(String name, String version, Asset tarFile, String binaryPath,
+                             String description, String homepage, String javaDependency) {
+        if (!version || version.trim().isEmpty() || version == 'latest' || !(version ==~ /[0-9a-zA-Z.,_+ -]+/)) {
+            throw new GradleException("Invalid Homebrew cask version '${version}': use a non-empty version containing only letters, digits, dots, commas, underscores, plus signs, hyphens, or spaces (not 'latest')")
+        }
+        return """cask ${rubyString(name)} do
+  version ${rubyString(version)}
+  sha256 ${rubyString(tarFile.sha256)}
+
+  url ${rubyString(tarFile.downloadUrl)}
+  name ${rubyString(name)}
+  desc ${rubyString(description)}
+  homepage ${rubyString(homepage)}
+
+  depends_on formula: ${rubyString(javaDependency)}
+
+  binary ${rubyString(binaryPath)}
 end
 """
-        pushFileToRepo(gitHub, homebrew.repository, homebrew.branch, 'Homebrew tap',
-            "Formula/${name}.rb", formulaTemplate.toString())
+    }
+
+    private static String rubyString(String value) {
+        return RUBY_STRING_GENERATOR.toJson(value).replace('#{', '\\#{')
     }
 
     private void pushFileToRepo(GitHub gitHub, Property<String> repositoryName, Property<String> branch,
@@ -122,12 +161,13 @@ end
             repo = gitHub.getRepository(repositoryName.get());
         } catch (IOException e) {
             throw new RuntimeException(
-                "Failed accessing scoop bucket repository ${repositoryName.get()}: ${e.message}", e);
+                "Failed accessing ${publicationType} repository ${repositoryName.get()}: ${e.message}", e);
         }
 
+        final String targetBranch = branch.orElse(project.provider(repo::getDefaultBranch)).get()
         GHContent existingContent;
         try {
-            existingContent = repo.getFileContent(contentPath);
+            existingContent = repo.getFileContent(contentPath, targetBranch);
         } catch (FileNotFoundException ignored) {
             existingContent = null;
         } catch (IOException e) {
@@ -137,11 +177,7 @@ end
         try {
             logger.info("Publishing to {} {}", publicationType, repo.fullName);
             repo.createContent()
-                .branch(
-                    branch
-                        .orElse(project.provider(repo::getDefaultBranch))
-                        .get()
-                )
+                .branch(targetBranch)
                 .sha(existingContent != null ? existingContent.sha : null)
                 .content(content)
                 .path(contentPath)
