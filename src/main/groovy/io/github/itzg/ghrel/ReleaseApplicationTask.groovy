@@ -7,7 +7,10 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import org.kohsuke.github.*
 
 import javax.inject.Inject
@@ -17,14 +20,17 @@ import java.nio.file.Files
 /**
  * Creates/updates a GitHub release and adds the application artifacts to the release.
  */
+@DisableCachingByDefault(because = "Releasing updates remote GitHub repositories")
 abstract class ReleaseApplicationTask extends DefaultTask {
 
     private GithubReleaserExtension extension;
 
     @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
     abstract RegularFileProperty getApplicationTar();
 
     @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
     abstract RegularFileProperty getApplicationZip();
 
     @Internal

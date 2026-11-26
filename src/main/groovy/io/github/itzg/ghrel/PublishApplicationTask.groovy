@@ -9,6 +9,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import org.kohsuke.github.GHContent
 import org.kohsuke.github.GHRepository
 import org.kohsuke.github.GitHub
@@ -17,6 +18,7 @@ import org.kohsuke.github.GitHubBuilder
 /**
  * Publishes the application to package manager repositories, such as a Scoop Bucket or Brew Tap.
  */
+@DisableCachingByDefault(because = "Publishing updates remote GitHub repositories")
 abstract class PublishApplicationTask extends DefaultTask {
 
     private static final JsonGenerator RUBY_STRING_GENERATOR =
